@@ -5,4 +5,4 @@
 ### (Consolidation may occur in the future and the following list is not exhaustive)
 
 * Calculate horizon yield (the IRR of total return)
-* Visualize Price-Trajectory yield for a bond
+* Visualize constant yield price-trajectory for a bond
