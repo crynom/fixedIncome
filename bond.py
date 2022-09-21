@@ -9,18 +9,8 @@ class Bond:
         self.coupon = float(input("What is the payment per period? (Enter -1 if unknown) "))
         self.fv = float(input("What is the future value of the bond? (Enter -1 if unknown) "))
 
-    def compute(self, value, n = None, ytm = None, pv = None, coupon = None, fv = None):
+    def compute(self, value):
         value = value.upper()
-        if n is None:
-            n = self.n
-        if ytm is None:
-            ytm = self.ytm
-        if pv is None:
-            pv = self.pv
-        if coupon is None:
-            coupon = self.coupon
-        if fv is None:
-            fv = self.fv
         if value == "PV":
             pv = 0
             pv += (self.fv + self.coupon) / ((1 + self.ytm / 100) ** self.n)
@@ -55,12 +45,27 @@ class Bond:
 
     def approximate_convexity(self):
         pass
-    def approximate_modified_duration(self):
-        pass
+    def approximate_modified_duration(self, dyield = 0.0001):
+        pv0 = self.pv
+        ytmdown = (1 + (self.ytm / 100) - dyield)
+        ytmup = (1 + (self.ytm / 100) + dyield)
+        pvdown = (self.fv + self.coupon) / (ytmdown ** self.n)
+        pvup = (self.fv + self.coupon) / (ytmup ** self.n)
+        for i in range(1, self.n):
+            pvdown += self.coupon / (ytmdown ** i)
+            pvup += self.coupon / (ytmup ** i)
+        approx_mod_dur = (pvdown - pvup) / (2 * pv0 * dyield)
+        self.approx_mod_dur = approx_mod_dur
+        return approx_mod_dur
     def approximate_macaulay_duration(self):
-        pass
+        approx_mod_dur = self.approximate_modified_duration()
+        approx_mac_dur = (1 + self.ytm / 100) * approx_mod_dur
+        self.approx_mac_dur = approx_mac_dur
+        return approx_mac_dur
 
 
-bond = Bond()
-bond.compute("PV")
-bond.constant_yield_price_trajectory()
+if __name__ == "__main__":
+    bond = Bond()
+    bond.compute("PV")
+    # bond.constant_yield_price_trajectory()
+    print(f"The approx mod dur is: {bond.approximate_modified_duration()}, approx mac dur: {bond.approximate_macaulay_duration()}")
